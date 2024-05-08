@@ -16,6 +16,7 @@ tokens = [
     'ELSE',
     'THEN',
     'COMPARASION',
+    'LINECOMMENT',
     'ID',
     'PRINTSTRING',
     'PRINTFLOAT',
@@ -45,6 +46,10 @@ t_PRINTINT = r'\.'
 t_COMPARASION = r'[<>]'
 
 t_ignore = " \t\n"
+
+def t_LINECOMMENT(t):
+    r'\s*\\.*$'
+    return t
 
 def t_FADD(t):
     r'f\+'

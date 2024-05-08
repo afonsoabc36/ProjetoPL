@@ -90,6 +90,10 @@ def p_COMPARASION_OPERATION(p):
     else:
         pass
 
+def p_INLINECOMMENT_OPERATION(p):
+    "Operacao : LINECOMMENT"
+    p[0] = ""
+
 def p_ID_OPERATION(p):
     "Operacao : ID"
     if p[1] in functions:
