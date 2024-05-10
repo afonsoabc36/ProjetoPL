@@ -57,14 +57,14 @@ def p_LOOP_END_OPERATION(p):
     "LoopEnd : LOOP"
     global loop_stack
     loopN = loop_stack.pop()
-    nol = loopN[-1]
+    nol = loopN[4:]
     p[0] = f"PUSHG 0\nPUSHI 1\nADD\nSTOREG 0\nJUMP WHILE{nol}\nENDWHILE{nol}:\n"
 
 def p_PLUSLOOP_END_OPERATION(p):
     "LoopEnd : PLUSLOOP"
     global loop_stack
     loopN = loop_stack.pop()
-    nol = loopN[-1]
+    nol = loopN[4:]
     p[0] = f"PUSHG 0\nADD\nSTOREG 0\nJUMP WHILE{nol}\nENDWHILE{nol}:\n"
 
 def p_ARITHMETIC_OPERATION(p):
