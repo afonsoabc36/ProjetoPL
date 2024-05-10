@@ -42,19 +42,30 @@ def p_DEFINITION_OPERATION(p):
     p[0] = ""
 
 def p_LOOP_OPERATION(p):
-    "Operacao : DO Operacoes LOOP"
+    "Operacao : DO "
     global number_of_loops, loop_stack
     nol = number_of_loops
     number_of_loops += 1
-    loop_stack.append('loop')
-    p[0] = f"WHILE{nol}:\nPUSHG 0\nPUSHG 1\nINF\nJZ ENDWHILE{nol}\n{p[2]}PUSHG 0\nPUSHI 1\nADD\nSTOREG 0\nJUMP WHILE{nol}\n"
-    loop_stack.pop()
+    loop_stack.append(f'loop{nol}')
+    p[0] = f"WHILE{nol}:\nPUSHG 0\nPUSHG 1\nINF\nJZ ENDWHILE{nol}\n"
 
-def p_PLUSLOOP_OPERATION(p):
-    "Operacao : DO Operacoes PLUSLOOP"
-    loop_stack.append('loop')
-    p[0] = f"DO {p[2]}+LOOP"
-    loop_stack.pop()
+def p_LOOPEND_OPERATION(p):
+    "Operacao : LoopEnd "
+    p[0] = p[1]
+
+def p_LOOP_END_OPERATION(p):
+    "LoopEnd : LOOP"
+    global loop_stack
+    loopN = loop_stack.pop()
+    nol = loopN[-1]
+    p[0] = f"PUSHG 0\nPUSHI 1\nADD\nSTOREG 0\nJUMP WHILE{nol}\nENDWHILE{nol}:\n"
+
+def p_PLUSLOOP_END_OPERATION(p):
+    "LoopEnd : PLUSLOOP"
+    global loop_stack
+    loopN = loop_stack.pop()
+    nol = loopN[-1]
+    p[0] = f"PUSHG 0\nADD\nSTOREG 0\nJUMP WHILE{nol}\nENDWHILE{nol}:\n"
 
 def p_ARITHMETIC_OPERATION(p):
     "Operacao : ArithmeticOperation"
@@ -108,7 +119,7 @@ def p_INLINECOMMENT_OPERATION(p):
 
 def p_ID_OPERATION(p):
     "Operacao : ID"
-    if (p[1] == 'i' or p[1] == 'I') and loop_stack and loop_stack[-1] == 'loop':
+    if (p[1] == 'i' or p[1] == 'I') and loop_stack and loop_stack[-1].startswith('loop'):
         p[0] = "PUSHG 0\n"
     elif p[1] in functions:
         p[0] = f"PUSHA {p[1]}\nCALL\n"
@@ -147,13 +158,13 @@ def p_error(p):
     print("Syntax error in input: ", p)
  
  # Build the parser
-parser = yacc.yacc()
+parser = yacc.yacc() # , debug=True)
 
 # reading input
 with open('input.fs', 'r') as file:
     # START
     print("START\n")
-    result = parser.parse(file.read())
+    result = parser.parse(file.read()) # , debug=True)
     print(result)
     # STOP
     print("STOP\n")
