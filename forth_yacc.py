@@ -15,6 +15,8 @@ operations = {
 }
 
 number_of_ifs = 0
+number_of_loops = 0
+loop_stack = []
 
 reservedWords = {
     'mod' : 'MOD',
@@ -38,6 +40,21 @@ def p_DEFINITION_OPERATION(p):
     "Operacao : ':' ID Operacoes ';'"
     functions[p[2]] = p[3]
     p[0] = ""
+
+def p_LOOP_OPERATION(p):
+    "Operacao : DO Operacoes LOOP"
+    global number_of_loops, loop_stack
+    nol = number_of_loops
+    number_of_loops += 1
+    loop_stack.append('loop')
+    p[0] = f"WHILE{nol}:\nPUSHG 0\nPUSHG 1\nINF\nJZ ENDWHILE{nol}\n{p[2]}PUSHG 0\nPUSHI 1\nADD\nSTOREG 0\nJUMP WHILE{nol}\n"
+    loop_stack.pop()
+
+def p_PLUSLOOP_OPERATION(p):
+    "Operacao : DO Operacoes PLUSLOOP"
+    loop_stack.append('loop')
+    p[0] = f"DO {p[2]}+LOOP"
+    loop_stack.pop()
 
 def p_ARITHMETIC_OPERATION(p):
     "Operacao : ArithmeticOperation"
@@ -91,7 +108,9 @@ def p_INLINECOMMENT_OPERATION(p):
 
 def p_ID_OPERATION(p):
     "Operacao : ID"
-    if p[1] in functions:
+    if (p[1] == 'i' or p[1] == 'I') and loop_stack and loop_stack[-1] == 'loop':
+        p[0] = "PUSHG 0\n"
+    elif p[1] in functions:
         p[0] = f"PUSHA {p[1]}\nCALL\n"
     else:
         p[0] = f"{reservedWords[p[1].lower()]}\n"

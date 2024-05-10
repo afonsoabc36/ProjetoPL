@@ -17,6 +17,9 @@ tokens = [
     'THEN',
     'COMPARASION',
     'LINECOMMENT',
+    'DO',
+    'PLUSLOOP',
+    'LOOP',
     'ID',
     'PRINTSTRING',
     'PRINTFLOAT',
@@ -84,6 +87,18 @@ def t_ELSE(t):
 
 def t_THEN(t):
     r'[tT][hH][eE][nN]'
+    return t
+
+def t_DO(t):
+    r'[dD][oO]'
+    return t
+
+def t_PLUSLOOP(t):
+    r'\+[lL][oO][oO][pP]'
+    return t
+
+def t_LOOP(t):
+    r'[lL][oO][oO][pP]'
     return t
 
 def t_PRINTSTRING(t):
