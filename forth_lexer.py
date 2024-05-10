@@ -47,6 +47,9 @@ t_COMPARASION = r'[<>]'
 
 t_ignore = " \t\n"
 
+def t_newline(t):
+    r'\n+'
+
 def t_LINECOMMENT(t):
     r'\s*\\.*$'
     return t

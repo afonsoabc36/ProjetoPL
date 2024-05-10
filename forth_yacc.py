@@ -18,11 +18,8 @@ number_of_ifs = 0
 
 reservedWords = {
     'mod' : 'MOD',
-    'MOD' : 'MOD',
-    'cr' : 'PUSHS "\\n"\nWRITES',
-    'CR' : 'PUSHS "\\n"\nWRITES',
-    'emit' : 'WRITECHR',
-    'EMIT' : 'WRITECHR'
+    'cr' : 'WRITELN',
+    'emit' : 'WRITECHR'
 }
 
 functions  = {
@@ -39,8 +36,6 @@ def p_OPERATIONS_SINGLE(p):
 
 def p_DEFINITION_OPERATION(p):
     "Operacao : ':' ID Operacoes ';'"
-    #if functions[p[2]] != None:
-    #    print('ID already exists')
     functions[p[2]] = p[3]
     p[0] = ""
 
@@ -99,7 +94,7 @@ def p_ID_OPERATION(p):
     if p[1] in functions:
         p[0] = f"PUSHA {p[1]}\nCALL\n"
     else:
-        p[0] = f"{reservedWords[p[1]]}\n"
+        p[0] = f"{reservedWords[p[1].lower()]}\n"
 
 def p_IFELSETHEN_OPERATION(p):
     "Condicional : IF Operacoes ELSE Operacoes THEN"
@@ -139,14 +134,13 @@ parser = yacc.yacc()
 with open('input.fs', 'r') as file:
     # START
     print("START\n")
-    for linha in file:
-        result = parser.parse(linha)
-        print(result)
+    result = parser.parse(file.read())
+    print(result)
     # STOP
     print("STOP\n")
     # Print das funções
     for key,function in functions.items():
         print(f"{key}:")
-        print(f"{function}")
+        print(f"{function}", end='')
         # RETURN
         print("RETURN\n")
