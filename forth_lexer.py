@@ -15,7 +15,7 @@ tokens = [
     'IF',
     'ELSE',
     'THEN',
-    'COMPARASION',
+    'COMPARISON',
     'LINECOMMENT',
     'DO',
     'PLUSLOOP',
@@ -46,7 +46,7 @@ t_DIV = r'\/'
 
 t_PRINTINT = r'\.'
 
-t_COMPARASION = r'[<>]'
+t_COMPARISON = r'<=|>=|=|<|>'
 
 t_ignore = " \t\n"
 
