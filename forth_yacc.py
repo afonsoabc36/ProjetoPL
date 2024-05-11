@@ -111,9 +111,8 @@ def p_PRINT_FLOAT_OPERATION(p):
 def p_CHAR_OPERATION(p):
     "Operacao : CHAR"
     global stack_elements
-    intValue = ord(p[1])
     stack_elements += 1
-    p[0] = f"PUSHI {intValue}\n"
+    p[0] = f'PUSHS "{p[1]}"\nCHRCODE\n'
 
 def p_COMPARASION_OPERATION(p):
     "Operacao : COMPARISON"

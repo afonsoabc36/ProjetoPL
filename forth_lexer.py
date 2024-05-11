@@ -107,7 +107,7 @@ def t_PRINTSTRING(t):
     return t
 
 def t_CHAR(t):
-    r'CHAR\s+([a-zA-Z])'
+    r'[cC][hH][aA][rR]\s+[^\s]'
     t.value = t.value[-1:]
     return t
 
