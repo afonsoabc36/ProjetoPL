@@ -90,7 +90,7 @@ def t_THEN(t):
     return t
 
 def t_DO(t):
-    r'[dD][oO]'
+    r'[dD][oO]\s+'
     return t
 
 def t_PLUSLOOP(t):

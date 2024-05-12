@@ -18,6 +18,7 @@ number_of_ifs = 0
 number_of_loops = 0
 loop_stack = []
 functions  = {}
+function_arguments = {}
 
 reservedWords = {
     'mod' : 'MOD',
@@ -25,6 +26,18 @@ reservedWords = {
     'emit' : 'WRITECHR',
     'swap' : 'SWAP'
 }
+
+def count_arguments(function_name, expression):
+    global function_arguments
+    function_arguments[function_name] = 0
+    decrement = ['pushi', 'pushf', 'pushg', 'char']
+    increment = ['add', 'sub', 'mul', 'div', 'mod', 'inf', 'sup', 'infeq', 'supeq', 'equal']
+   
+    for word in expression.lower().split():
+        if word in increment:
+            function_arguments[function_name] += 2
+        if word in decrement:
+            function_arguments[function_name] -= 1
 
 def p_OPERATIONS_MULTIPLE(p):
     "Operacoes : Operacoes Operacao"
@@ -37,6 +50,7 @@ def p_OPERATIONS_SINGLE(p):
 def p_DEFINITION_OPERATION(p):
     "Operacao : ':' ID Operacoes ';'"
     functions[p[2]] = p[3]
+    count_arguments(p[2], p[3])
     p[0] = ""
 
 def p_LOOP_OPERATION(p):
@@ -142,7 +156,10 @@ def p_ID_OPERATION(p):
         p[0] = f"PUSHG {stack_elements - 2}\n"
         stack_elements += 1
     elif p[1] in functions:
-        p[0] = f"PUSHA {p[1]}\nCALL\n"
+        result = f"PUSHA {p[1]}\nCALL\n"
+        for i in range(function_arguments[p[1]]):
+            result += f"SWAP\nPOP 1\n"
+        p[0] = result
         # TODO: Verificar e alterar quantos elementos sobe ou desce a stack depois de chamada a função
     else:
         p[0] = f"{reservedWords[p[1].lower()]}\n"
@@ -197,6 +214,11 @@ with open('input.fs', 'r') as file:
     # Print das funções
     for key,function in functions.items():
         print(f"{key}:")
+        fan = function_arguments[key]
+        if fan > 0:
+            for i in range(fan):
+                if fan > 0:
+                    print(f"PUSHFP\nLOAD { i - (fan)}")
         print(f"{function}", end='')
         # RETURN
         print("RETURN\n")
