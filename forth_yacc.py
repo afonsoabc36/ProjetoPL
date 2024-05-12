@@ -1,5 +1,5 @@
 import ply.yacc as yacc
-import sys
+import re
 from forth_lexer import tokens, literals
 
 operations = {
@@ -21,23 +21,57 @@ functions  = {}
 function_arguments = {}
 
 reservedWords = {
-    'mod' : 'MOD',
-    'cr' : 'WRITELN',
-    'emit' : 'WRITECHR',
-    'swap' : 'SWAP'
+    'mod' : {
+            'function': 'MOD',
+            'arguments': 2,
+            'net_effect': -1
+        },
+    'cr' : {
+            'function': 'WRITELN',
+            'arguments': 0,
+            'net_effect': 0
+        },
+    'emit' : {
+            'function': 'WRITECHR',
+            'arguments': 1,
+            'net_effect': -1
+        },
+    'swap' : {
+            'function': 'SWAP',
+            'arguments': 2,
+            'net_effect': 0
+        },
+    'dup' : {
+            'function': 'DUP 1',
+            'arguments': 1,
+            'net_effect': 1
+        }
 }
 
 def count_arguments(function_name, expression):
     global function_arguments
-    function_arguments[function_name] = 0
-    decrement = ['pushi', 'pushf', 'pushg', 'char']
+    arguments = 0
+    net_effect = 0
+    decrement = ['pushi', 'pushf', 'pushg', 'char', 'dup', 'load']
     increment = ['add', 'sub', 'mul', 'div', 'mod', 'inf', 'sup', 'infeq', 'supeq', 'equal']
+    store = ['storeg', 'jz']
    
     for word in expression.lower().split():
         if word in increment:
-            function_arguments[function_name] += 2
-        if word in decrement:
-            function_arguments[function_name] -= 1
+            arguments += 2
+        elif word in decrement:
+            arguments -= 1
+        elif word in store:
+            arguments += 1
+        elif word in functions.keys():
+            arguments += function_arguments[word]['arguments']
+        elif word.lower() in reservedWords.keys():
+            arguments += reservedWords[word]['arguments']
+
+    function_arguments[function_name] = {
+        'arguments': arguments,
+        'net_effect' : net_effect
+    }
 
 def p_OPERATIONS_MULTIPLE(p):
     "Operacoes : Operacoes Operacao"
@@ -59,7 +93,11 @@ def p_LOOP_OPERATION(p):
     nol = number_of_loops
     number_of_loops += 1
     loop_stack.append(f'loop{nol}')
-    p[0] = f"WHILE{nol}:\nPUSHG {stack_elements - 1}\nPUSHG {stack_elements - 2}\nINF\nJZ ENDWHILE{nol}\nPUSHG {stack_elements - 3}\n"
+    if stack_elements < 3:
+        se = 3
+    else:
+        se = stack_elements
+    p[0] = f"WHILE{nol}:\nPUSHG {se - 1}\nPUSHG {se - 2}\nINF\nJZ ENDWHILE{nol}\nPUSHG {se - 3}\n"
     stack_elements += 1
 
 def p_LOOPEND_OPERATION(p):
@@ -71,7 +109,12 @@ def p_LOOP_END_OPERATION(p):
     global loop_stack, stack_elements
     loopN = loop_stack.pop()
     nol = loopN[4:]
-    p[0] = f"STOREG {stack_elements - 3}\nPUSHG {stack_elements-1}\nPUSHI 1\nADD\nSTOREG {stack_elements-1}\nJUMP WHILE{nol}\nENDWHILE{nol}:\nPOP 2\n"
+    if stack_elements < 4:
+        se = 4
+    else:
+        se = stack_elements
+    p[0] = f"STOREG {se - 4}\nPUSHG {se-2}\nPUSHI 1\nADD\nSTOREG {se-2}\nJUMP WHILE{nol}\nENDWHILE{nol}:\nPOP 2\n"
+    
     stack_elements -= 3
 
 def p_PLUSLOOP_END_OPERATION(p):
@@ -153,17 +196,23 @@ def p_ID_OPERATION(p):
     "Operacao : ID"
     global stack_elements
     if (p[1] == 'i' or p[1] == 'I') and loop_stack and loop_stack[-1].startswith('loop'):
-        p[0] = f"PUSHG {stack_elements - 2}\n"
+        if stack_elements < 4:
+            se = 4
+        else:
+            se = stack_elements
+        p[0] = f"PUSHG {se - 2}\n"
         stack_elements += 1
     elif p[1] in functions:
-        result = f"PUSHA {p[1]}\nCALL\n"
-        for i in range(function_arguments[p[1]]):
-            result += f"SWAP\nPOP 1\n"
+        faa = function_arguments[p[1]]['arguments']
+        fane = function_arguments[p[1]]['net_effect']
+        stack_elements += faa
+        result = ""
+        result += functions[p[1]]
+        stack_elements += fane
         p[0] = result
-        # TODO: Verificar e alterar quantos elementos sobe ou desce a stack depois de chamada a função
-    else:
-        p[0] = f"{reservedWords[p[1].lower()]}\n"
-        # TODO: Verificar e alterar quantos elementos sobe ou desce a stack depois de chamada a função
+    elif p[1] in reservedWords.keys():
+        p[0] = f"{reservedWords[p[1].lower()]['function']}\n"
+        stack_elements += reservedWords[p[1].lower()]['net_effect']
 
 def p_IFELSETHEN_OPERATION(p):
     "Condicional : IF Operacoes ELSE Operacoes THEN"
@@ -193,7 +242,7 @@ def p_ArithmeticOperation(p):
                         | FDIV
     """
     global stack_elements
-    stack_elements -= 2
+    stack_elements -= 1
     p[0] = operations[p[1]]
 
 # Error rule for syntax errors
@@ -207,18 +256,21 @@ parser = yacc.yacc() # debug=True)
 with open('input.fs', 'r') as file:
     # START
     print("START\n")
-    result = parser.parse(file.read()) # , debug=True)
+    result = parser.parse(file.read()) #, debug=True)
     print(result)
     # STOP
     print("STOP\n")
+    '''
     # Print das funções
     for key,function in functions.items():
         print(f"{key}:")
-        fan = function_arguments[key]
+        fan = function_arguments[key]['arguments']
         if fan > 0:
             for i in range(fan):
                 if fan > 0:
                     print(f"PUSHFP\nLOAD { i - (fan)}")
         print(f"{function}", end='')
+    
         # RETURN
         print("RETURN\n")
+    '''
