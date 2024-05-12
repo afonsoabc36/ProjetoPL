@@ -210,7 +210,7 @@ def p_ID_OPERATION(p):
         result += functions[p[1]]
         stack_elements += fane
         p[0] = result
-    elif p[1] in reservedWords.keys():
+    elif p[1].lower() in reservedWords.keys():
         p[0] = f"{reservedWords[p[1].lower()]['function']}\n"
         stack_elements += reservedWords[p[1].lower()]['net_effect']
 
@@ -256,7 +256,7 @@ parser = yacc.yacc() # debug=True)
 with open('input.fs', 'r') as file:
     # START
     print("START\n")
-    result = parser.parse(file.read()) #, debug=True)
+    result = parser.parse(file.read()) # , debug=True)
     print(result)
     # STOP
     print("STOP\n")
