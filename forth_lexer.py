@@ -20,6 +20,7 @@ tokens = [
     'DO',
     'PLUSLOOP',
     'LOOP',
+    'PARENCOMMENTS',
     'ID',
     'PRINTSTRING',
     'PRINTFLOAT',
@@ -45,6 +46,8 @@ t_MUL = r'\*'
 t_DIV = r'\/'
 
 t_PRINTINT = r'\.'
+
+t_PARENCOMMENTS = r'\([^)]*\)'
 
 t_COMPARISON = r'<=|>=|=|<|>'
 

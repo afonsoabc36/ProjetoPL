@@ -87,6 +87,10 @@ def p_DEFINITION_OPERATION(p):
     count_arguments(p[2], p[3])
     p[0] = ""
 
+def p_PARENCOMMENTS_OPERATION(p):
+    "Operacao : PARENCOMMENTS"
+    p[0] = ""
+
 def p_LOOP_OPERATION(p):
     "Operacao : DO"
     global number_of_loops, loop_stack, stack_elements
