@@ -47,7 +47,7 @@ reservedWords = {
             'net_effect': 1
         },
     'key' : {
-            'function': 'READ',
+            'function': 'READ\nCHRCODE',
             'arguments': 0,
             'net_effect': 1
         },
