@@ -45,6 +45,21 @@ reservedWords = {
             'function': 'DUP 1',
             'arguments': 1,
             'net_effect': 1
+        },
+    'key' : {
+            'function': 'READ',
+            'arguments': 0,
+            'net_effect': 1
+        },
+    'space' : {
+            'function': 'PUSHS " "\nWRITES',
+            'arguments': 0,
+            'net_effect': 0
+        },
+    'spaces' : {
+            'function': 'spaces0:\nPUSHI 1\nSUB\nDUP 1\nPUSHI 32\nWRITECHR\nPUSHI 0\nSUP\nJZ endspaces0\nJUMP spaces0\nendspaces0:\nPOP 1',
+            'arguments': 1,
+            'net_effect': -1
         }
 }
 
