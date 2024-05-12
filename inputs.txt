@@ -1,0 +1,40 @@
+-- EXP ARITMETICAS
+2 3 + .
+2 3 + 10 + .
+30 5 + 7 / .
+7 2* 1+ .
+10 3 MOD .
+
+-- DEFINIR FUNÇÔES
+: AVERAGE ( a b -- avg ) + 2/ ;
+10 20 AVERAGE .
+: TOFU ." Yummy bean curd!" ;
+: SPROUTS ." Miniature vegetables." ;
+: MENU
+ CR TOFU CR SPROUTS CR
+;
+MENU
+
+-- SPACES
+5 . 2 SPACES 4 .
+5 . SPACE 4 .
+
+-- KEY INPUT
+: TESTKEY ( -- )
+ ." Hit a key: " KEY CR
+ ." That = " . CR
+;
+TESTKEY
+
+-- COMENTARIOS
+: hello-world ( -- )
+ ." Hello, World!" cr ;
+hello-world \ Call the defined word
+
+-- CONDICIONAIS
+: maior2 > if ." 77 é o maior " else ." 156 é o maior " then ;
+77 156 maior2
+
+-- LOOPS
+: somatorio 0 swap 1 do i + loop ;
+11 somatorio .
